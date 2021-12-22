@@ -63,6 +63,7 @@ function game()
     ctx.fillRect(px*gs,py*gs,gs-2,gs-2);
 
     // Loop through the blocks on screen
+    let destroyList = [];
     for(var i = 0; i<trail.length; i++)
     {
  		// Increase block counter at block's y level
@@ -82,11 +83,13 @@ function game()
 					if(trail[w].y==trail[e].y)
 						trail[w].destroy = true;
 					else if(trail[w].y<trail[e].y)
-						trail[w].y++;
+                        trail[w].fall = true;
+						//trail[w].y++;
 				}
 			}
 			if(trail[e].destroy)
-				trail.splice(e,1);
+                destroyList.push(trail[e]);
+				//trail.splice(e,1);
 		}
 
     	if(trail[i].y>=19)
@@ -100,6 +103,12 @@ function game()
     	// Draw the blocks on screen
     	ctx.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);
 
+    }
+
+    // remove all blocks that got destroyed
+    for(let i = 0; i < destroyList.length; i++) {
+        let indexOfDestroyBlock = trail.indexOf(destroyList[i]);
+        trail.splice(indexOfDestroyBlock, 1);
     }
 }
 
