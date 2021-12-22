@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<style>
+  body {
+    background: black;
+  }
+  article {
+    margin: auto;
+    width: 480px;
+    padding: 0;
+  }
+  p {
+    color: white;
+    display: inline;
+    font-size: 80%;
+  }
+  button {
+  margin-bottom: 10px;
+}
+  #demo {
+   line-height: 0;
+}
+  #demo div {
+    width: 10px;
+    height: 10px;
+    margin: 1px;
+    display: inline-block;
+    border-radius: 5px;
+}
+</style>
+<body>
+
+<article>
+<button id="clear" onclick="Clear()">Clear</button>
+<button onclick="instant()" onmouseover="document.getElementById('instantWarning').innerHTML='This might take a few seconds to complete.'" onmouseout="document.getElementById('instantWarning').innerHTML='';">Instant Fill</button>
+<p id="instantWarning"></p>
+
+<div id="demo" style="color: blue"></div>
+
+<script>
+i = 0;
+var myVar = setInterval(myTimer, 5);
+
+function myTimer() {
+    if(i<1000)
+    {
+      i+=1;
+      var d = Math.floor(Math.random()*5);
+      if(d==0) d = "white";
+      if(d==1) d = "blue";
+      if(d==2) d = "red";
+      if(d==3) d = "yellow";
+      if(d==4) d = "green";
+      document.getElementById("demo").innerHTML += '<div style="background: '+d+';"></div>';
+    }
+}
+function Clear() {
+    document.getElementById("demo").innerHTML = '';
+    i = 0;
+}
+function instant() {
+    Clear();
+    for(i = 0; i<1000; i+=1)
+    {
+      var d = Math.floor(Math.random()*5);
+      if(d==0) d = "white";
+      if(d==1) d = "blue";
+      if(d==2) d = "red";
+      if(d==3) d = "yellow";
+      if(d==4) d = "green";
+      document.getElementById("demo").innerHTML += '<div style="background: '+d+';"></div>';
+    }
+}
+</script>
+</article>
+</body>
+</html>

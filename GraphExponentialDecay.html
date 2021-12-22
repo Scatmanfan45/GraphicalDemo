@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="3200" height="800" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML canvas tag.</canvas>
+
+<script>
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+ctx.strokeText(getPattern([2, 4, 6, 8, 10], 24, 30), 10, 100);
+//plotData(40, 10, [1, 2, 3, 4, 1, 2, 3, 4, 2, 4]);
+var pattern = getPattern([2, 4, 6, 8, 10], 24, 30);
+pattern.push(1440);
+plotTolerance(10, 22, 58, pattern, 0, 1600
+	, 0.5);
+
+// draw days
+ctx.strokeStyle = "#AED6F1";
+for(var dayAt = 1; dayAt*24 < myCanvas.width; dayAt++) {
+  ctx.beginPath();
+  ctx.moveTo(dayAt*24, 0);
+  ctx.lineTo(dayAt*24, myCanvas.height);
+  ctx.stroke();
+}
+
+// draw threshhold
+ctx.strokeStyle = "red";
+ctx.beginPath();
+ctx.moveTo(0, myCanvas.height - 15);
+ctx.lineTo(myCanvas.width, myCanvas.height - 15);
+ctx.stroke();
+ctx.strokeStyle = "black";
+
+function plotTolerance(initAmount, highAdd, halfLife, highTimes, startTime
+	, endTime, timeStepAmount) {
+    
+    	data = getAmounts(initAmount, highAdd, halfLife, highTimes
+        	, startTime, endTime, timeStepAmount);
+            
+	    plotData(1, 1, data);
+}
+
+function plotData(stepWidth, stepHeight, data) {
+  	ctx.beginPath();
+	ctx.moveTo(0, myCanvas.height - data[0] * stepHeight);
+    
+	for(var i = 0; i < data.length; i++) {
+    
+    	ctx.lineTo(i * stepWidth, myCanvas.height
+        	- data[i] * stepHeight);
+    }
+    ctx.stroke();
+}
+
+function getAmounts(initAmount, highAdd, halfLife, highTimes, startTime
+	, endTime, timeStepAmount) {
+    
+    var returnAmounts = [];
+    var amountsAtHighTimes = getAmountsAfterHighs(initAmount, highAdd
+    	, halfLife, highTimes);
+  	
+    var timeAt = startTime;
+    while(timeAt <= endTime) {
+    	
+        returnAmounts.push(getAmountAtTime(timeAt, initAmount, halfLife
+        	, highTimes, amountsAtHighTimes, startTime));
+        timeAt += timeStepAmount;
+    }
+    
+    return returnAmounts;
+}
+
+function getAmountAtTime(time, initAmount, halfLife, highTimes
+	, amountsAtHighTimes, startTime) {
+    
+    // Figure out correct starting and ending times
+    var timeBefore = startTime;
+    var timeAfter = 0;
+    var timeIndexAt = 0;
+    while(timeIndexAt < highTimes.length && highTimes[timeIndexAt]
+    	<= time) {
+        timeBefore = highTimes[timeIndexAt];
+        timeIndexAt++;
+    }
+    if(timeIndexAt < highTimes.length)
+    	timeAfter = highTimes[timeIndexAt];
+  	else
+    	timeAfter = highTimes[highTimes.length-1];
+  
+  // compute new amount
+  var correctAmountBefore = timeIndexAt > 0
+  	? amountsAtHighTimes[timeIndexAt - 1] : initAmount;
+  return getDecayedAmount(correctAmountBefore, time
+  	- timeBefore, halfLife);
+}
+
+function getAmountsAfterHighs(initAmount, highAdd, halfLife, highTimes) {
+
+	var currentAmount = initAmount;
+	var amountsAtHighTimes = [];
+    var timeBefore = 0;
+    var timeIndex = 0;
+    while(timeIndex < highTimes.length) {
+    	if(timeIndex > 0)
+    		timeBefore = highTimes[timeIndex-1];
+      	currentAmount = getDecayedAmount(currentAmount,
+        	highTimes[timeIndex] - timeBefore, halfLife) + highAdd;
+      	amountsAtHighTimes.push(currentAmount);
+        timeIndex++;
+    }
+    
+    return amountsAtHighTimes;
+}
+
+function getDecayedAmount(initAmount, time, halfLife) {
+
+	return initAmount * Math.pow(0.5, time / halfLife);
+}
+
+function getPattern(base, startIncreaseBy, repeatTimes) {
+	
+    var patternToReturn = [];
+    for(var repeatTime = 0; repeatTime < repeatTimes; repeatTime++) {
+    	for(var baseAt = 0; baseAt < base.length; baseAt++)
+    		patternToReturn.push(startIncreaseBy*repeatTime
+            	+ base[baseAt]);
+    }
+    return patternToReturn;
+}
+</script>
+
+</body>
+</html>
+

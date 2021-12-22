@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gc" width="400" height="400"></canvas>
+<br>
+<div style="width:500px">
+    <span style="width:80px">
+        <p><strong>Instructions</strong></p>
+    </span>
+    <span style="width:420px">
+        <p> Press the space key to release the floating green block.
+            When a row of blocks is completely filled, it will destroy, letting all blocks above
+            fall in its place. The goal is to remove all blocks from the bottom. Good luck!</p>
+    </span>
+</div>
+<br>
+<p id="p_score"></p>
+<br>
+<p id="p_hiscore"></p>
+<script>
+
+window.onload=function()
+{
+	canv = document.getElementById("gc");
+    ctx = canv.getContext("2d");
+    document.addEventListener("keydown",keyPush);
+    setInterval(game,1000/15);
+}
+
+gs=20; // Size (in pixels) of tile squares
+tc=20; // Number of tiles (horizontal and vertical)
+hiscore = 0;
+gameSetup();
+
+function game()
+{
+	px+=xv;
+    py+=yv;
+    if(px<=0 && xv<0)
+    {
+        xv = -xv;
+    }
+    if(px>=tc-1 && xv>0)
+    {
+        xv = -xv;
+    }
+
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,canv.width,canv.height);
+    
+
+    // Clear block count block array values
+    for(var i = 0; i<20; i++)
+    	countBlocks[i] = 0;
+
+    if(dead==false)
+        ctx.fillStyle="lime";
+    else if(dead==true)
+        ctx.fillStyle="orange";
+
+    // Draw the player block
+    ctx.fillRect(px*gs,py*gs,gs-2,gs-2);
+
+    // Loop through the blocks on screen
+    for(var i = 0; i<trail.length; i++)
+    {
+ 		// Increase block counter at block's y level
+    	countBlocks[trail[i].y]++;
+
+    	// Nested loop for checking whether there is block underneath
+    	// and if so, stop falling
+    	// Also this nested loop will check whether it is appropriate to have a block destroy itself.
+		for(var e = 0; e<trail.length; e++)
+		{
+			if(trail[i].y+1==trail[e].y && trail[i].x==trail[e].x)
+				trail[i].fall = false;
+			if(countBlocks[trail[e].y]==20)
+			{
+				for(var w = 0; w<trail.length; w++)
+				{
+					if(trail[w].y==trail[e].y)
+						trail[w].destroy = true;
+					else if(trail[w].y<trail[e].y)
+						trail[w].y++;
+				}
+			}
+			if(trail[e].destroy)
+				trail.splice(e,1);
+		}
+
+    	if(trail[i].y>=19)
+    		trail[i].fall = false;
+
+    	if(trail[i].fall)
+    		trail[i].y++;
+
+   
+
+    	// Draw the blocks on screen
+    	ctx.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);
+
+    }
+}
+
+function gameSetup()
+{
+    score = 0;
+
+    px=10; // Position of player
+    py=2; // Position of player
+
+    //ax=15; // Position of apple
+    //ay=15; // Position of apple
+
+    xv=1; // Horizontal speed of player
+    yv=0; // Vertical speed of player
+
+    trail=[]; // Array holding the positions of each dropped tile
+
+    // add some starting blocks
+    let numBeginBlocks = 15 + Math.floor(Math.random() * 11);
+    for(let i = 0; i < numBeginBlocks; i++) {
+        let randColumnNum = Math.floor(Math.random() * tc);
+        let height = tc-1;
+
+        // stack block if block already in column
+        while(trail.find(a => a.x == randColumnNum && a.y == height) != undefined && height >= 0)
+            height--;
+
+        // add block at correct location
+        trail.push({x:randColumnNum,y:height,fall:false,destroy:false})
+        
+    }
+
+    countBlocks=new Array(20); // array that holds # blocks on each y level
+
+    dead = false;
+}
+
+function gameRestart()
+{
+    gameSetup();
+}
+
+function keyPush(evt)
+{
+	switch(evt.keyCode)
+    {
+        case 8:
+            gameRestart();
+            break;
+    	case 32: // User presses space key
+    		// Drop block
+    		trail.push({x:px,y:py,fall:true,destroy:false});
+    		break;
+    }
+
+}
+
+</script>
+
+</body>
+</html>

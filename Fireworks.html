@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fireworks Amateur</title>
+</head>
+
+<body style="margin: 0;">
+
+<canvas style="background: white;">
+</canvas>
+
+<script>
+var canvas = document.querySelector('canvas');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var ctx = canvas.getContext("2d");
+
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+var objArray = [];
+var timer = 150;
+var idCounter = 0;
+
+// create circles
+
+console.log(objArray);
+
+// Update canvas and draw circles
+setInterval(updateCanvas,33);
+
+
+function updateCanvas()
+{
+	// Clear the canvas for the next frame
+    ctx.fillStyle = "#00000005";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // Create circles every second
+    timer += 1;
+    if(timer>=75)
+    {
+    	timer -= 75;
+        for(var i = 0; i<10; i++)
+		{
+			var r = Math.random()*15;
+    		var xx = Math.random()*(canvas.width-r*2)+r;
+    		var yy = Math.random()*(canvas.height-r*2)+r;
+    		var hsp = Math.random()*8-4;
+    		var vsp = Math.random()*8-4;
+			objArray.push(new Circle(xx, yy, r, hsp, vsp));
+		}
+    }
+    
+	// Update and draw all circles
+    for(var i=0; i<objArray.length; i++)
+    {
+    	objArray[i].step();
+    }
+    
+    // Debug option: Bar indicating how many objects are being used
+    ctx.fillStyle = "#ffdf89";
+    ctx.fillRect(0,canvas.height-objArray.length/100*canvas.height,
+    				3, objArray.length/100*canvas.height);
+}
+
+function Circle(x, y, r, hspeed, vspeed)
+{
+//	this.id = idCounter;
+//  idCounter++;
+//  if(idCounter>=100)
+//   idCounter = 0;
+	this.id = issueId();
+	this.x = x;
+    this.y = y;
+    this.rstart = r;
+    this.r = this.rstart;
+    this.life = 0;
+    this.lifeTime = 300+Math.random()*200;
+    this.hspeed = hspeed;
+    this.vspeed = vspeed;
+    this.gravity = 0.02;
+    this.color = 
+    {
+    	r: Math.random()*200+55,
+        g: Math.random()*200+55,
+        b: Math.random()*200+55,
+        a: 0.7,
+        txt: function()
+        {
+        	return "rgba("+this.r+","+this.g+","+this.b+","+this.a+")";
+        }
+    }
+    //this.color =
+    //	"rgba("+Number(Math.random()*200+55)+","
+    //    +Number(Math.random()*200+55)+","+
+    //    Number(Math.random()*200+55)+
+    //    ",0.7)";
+    
+    this.step = function()
+    {
+    	this.vspeed += this.gravity;
+    	this.x += this.hspeed;
+        this.y += this.vspeed;
+        if(this.x + this.r > canvas.width)
+        {
+        	this.x = canvas.width - this.r;
+        	this.hspeed = -this.hspeed;
+        }
+        if(this.x - this.r < 0)
+        {
+        	this.x = this.r;
+            this.hspeed = -this.hspeed;
+        }
+        if(this.y + this.r > canvas.height)
+        {
+        	this.y = canvas.height - this.r;
+        	this.vspeed = -this.vspeed;
+        }
+        if(this.y - this.r < 0)
+        {
+        	this.y = this.r;
+            this.vspeed = -this.vspeed;
+        }
+        this.life += 1;
+        this.r = Math.sqrt(this.life/this.lifeTime)/Math.sqrt(this.life/this.lifeTime+1)
+        		*this.rstart;
+        if(this.life>=this.lifeTime)
+        {
+        	//Create a bunch of little short lived sparks
+            objArray.push(new SparkPart(this.x, this.y, -4, -2));
+            objArray.push(new SparkPart(this.x, this.y, 4, -2));
+            objArray.push(new SparkPart(this.x, this.y, -2, -4));
+            objArray.push(new SparkPart(this.x, this.y, 2, -4));
+            destroyObj(this.id);
+        }
+        this.draw();
+    }
+    this.draw = function()
+    {
+    	/* First we draw a halo around the circle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r*1.5, 0, 2 * Math.PI);
+        this.color.a = Math.sin(this.life*Math.PI/this.lifeTime);
+        ctx.fillStyle = "rgba(255,255,255,"+this.color.a/6+")";
+        ctx.fill();
+        
+        // Second we draw a white dot the size of the circle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,255,255,"+this.color.a+")";
+        ctx.fill();*/
+        
+    	// Lastly we draw the actual circle
+    	ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+        /*this.color =
+    	"rgba("+Number(Math.random()*200+55)+","
+        +Number(Math.random()*200+55)+","+
+        Number(Math.random()*200+55)+
+        ",0.7)";*/
+        
+        //this.color.a=1*Math.sqrt(1-Math.pow((this.life-225)/225,2));
+        //console.log(Math.sqrt(1-Math.pow((this.life-450)/450,2)));
+        ctx.fillStyle=this.color.txt();
+		ctx.fill();
+    }
+}
+
+function SparkPart(x, y, hspeed, vspeed)
+{
+	this.x = x;
+    this.y = y;
+    this.length = 1;
+    this.hspeed = hspeed;
+    this.vspeed = vspeed;
+    this.gravity = 0.05;
+    this.life = 200;
+    this.id = issueId();
+    
+    this.step = function()
+    {
+    	this.vspeed += this.gravity;
+    	this.x += this.hspeed;
+        this.y += this.vspeed;
+        if(this.x + this.length > canvas.width)
+        {
+        	this.x = canvas.width - this.length;
+        	this.hspeed = -this.hspeed;
+        }
+        if(this.x - this.length < 0)
+        {
+        	this.x = this.length;
+            this.hspeed = -this.hspeed;
+        }
+        if(this.y + this.length > canvas.height)
+        {
+        	this.y = canvas.height - this.length;
+        	this.vspeed = -this.vspeed;
+        }
+        if(this.y - this.length < 0)
+        {
+        	this.y = this.length;
+            this.vspeed = -this.vspeed;
+        }
+    
+    	this.life -= 1;
+        if(this.life<=0)
+        {
+        	destroyObj(this.id);
+        }
+        
+        this.draw();
+    }
+    
+    this.draw = function()
+    {
+    	ctx.fillStyle = "rgb(254,255,206,"+this.life/200+")";
+        ctx.fillRect(
+        	this.x-this.length,this.y-this.length,
+            	this.length*2,this.length*2);
+   
+        //console.log(this);
+    }
+}
+
+function destroyObj(id)
+{
+	for(var i = 0; i<objArray.length; i++)
+    {
+    	if(objArray[i].id == id)
+        {
+        	objArray.splice(i,i+1);
+            break;
+        }
+    }
+}
+
+function issueId()
+{
+	var toReturn = idCounter;
+    idCounter++;
+    if(idCounter>=100)
+    	idCounter = 0;
+    return toReturn;
+}
+</script>
+
+</body>
+</html>

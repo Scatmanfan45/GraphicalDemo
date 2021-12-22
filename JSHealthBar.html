@@ -1,0 +1,86 @@
+<!Doctype html>
+<html>
+<style>
+* {
+  /*border: 1px solid red;*/
+}
+body {
+  padding: 5px;
+}
+h1 {
+  color: red;
+  text-shadow: 2px 2px 2px black;
+}
+#container {
+  width: 100px;
+  height: 10px;
+  position: relative;
+  background: black;
+  margin: 10px auto;
+  padding: 0px;
+  box-shadow: 2px 2px 2px gray;
+}
+#bar {
+  width: 70%;
+  height: 100%;
+  background: red;
+  margin: 0px;
+}
+.line {
+ margin-top: 6px;
+ margin-bottom: 6px;
+}
+.txt {
+  width: 30px;
+}
+</style>
+<script>
+  function updateBar()
+  {
+    // Set up variables that point to HTML elements
+    var bar = document.getElementById("bar");
+    var container = document.getElementById("container");
+    var firstValue = document.getElementById("txt1").value;
+    var secondValue = document.getElementById("txt2").value;
+    var scale = document.getElementById("txt3").value;
+    var col1 = document.getElementById("col1").value;
+    var col2 = document.getElementById("col2").value;
+
+    // Update scale of Health Bar
+    container.style.width = String(Math.round(100*scale))+"px";
+    container.style.height = String(Math.round(10*scale))+"px";
+
+    // Calculate percentage and adjust width of health bar
+    var result = String(Math.min(firstValue / secondValue * 100,100));
+    bar.style.width = result+"%";
+
+    // adjust healthbar color
+    bar.style.background = col1;
+    container.style.background = col2;
+   document.getElementById("title").style.color=col1;  }
+</script>
+<body>
+
+<h1 id="title">Health Bar</h1>
+
+<div id="container" value="1">
+<div id="bar"></div>
+</div>
+<div class="line">
+<input type="number" class="txt" id="txt1" value="7" onclick="updateBar()"onchange="updateBar()"> / 
+<input type="number" class="txt" id="txt2" value="10" onclick="updateBar()" onchange="updateBar()">
+</div>
+<div class="line">
+Scale: 
+<input type="range" id="txt3" value="1" min="1" max="10" onchange="updateBar()">
+</div>
+<div class="line">
+<input type="color" id="col1" value="#FF0000" onchange="updateBar()">
+<input type="color" id="col2" value="#000000" onchange="updateBar()">
+</div>
+<div class="line">
+<input type="button" value="Update" onclick="updateBar()">
+</div>
+
+</body>
+</html>
